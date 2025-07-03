@@ -48,7 +48,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Not Found", http.StatusNotFound)
 			return
 		}
-		http.Redirect(w, r, orig, http.StatusMovedPermanently)
+		http.Redirect(w, r, orig, http.StatusTemporaryRedirect)
 		return
 	}
 
