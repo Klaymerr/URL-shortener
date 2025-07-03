@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand/v2"
+	"mime"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -14,7 +15,9 @@ var shortToOriginal = make(map[string]string)
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		if r.Header.Get("Content-Type") != "text/plain" {
+		fmt.Println(r.Header.Get("Content-Type"))
+		mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+		if err != nil || mediaType != "text/plain" {
 			http.Error(w, "Content-Type not supported", http.StatusUnsupportedMediaType)
 			return
 		}
