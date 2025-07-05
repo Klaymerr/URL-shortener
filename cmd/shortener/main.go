@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/gin-gonic/gin"
 	"io"
 	"math/rand/v2"
@@ -8,6 +9,9 @@ import (
 	"net/url"
 	"strconv"
 )
+
+var ServerAddressShort *string
+var ServerAddressLong *string
 
 var shortToOriginal = make(map[string]string)
 
@@ -44,10 +48,14 @@ func posting(c *gin.Context) {
 	newID := strconv.FormatInt(rand.Int64(), 36)
 	shortToOriginal[newID] = rawURL
 
-	c.String(http.StatusCreated, "http://localhost:8080/"+newID)
+	c.String(http.StatusCreated, *ServerAddressShort+newID)
 }
 
 func main() {
+	ServerAddressLong = flag.String("a", "localhost:8080", "HTTP server address")
+	ServerAddressShort = flag.String("b", "http://localhost:8080/", "Base URL for short links")
+	flag.Parse()
+
 	router := gin.Default()
 
 	router.HandleMethodNotAllowed = true
@@ -58,5 +66,5 @@ func main() {
 	router.GET("/:id", getting)
 	router.POST("/", posting)
 
-	router.Run("localhost:8080")
+	router.Run(*ServerAddressLong)
 }

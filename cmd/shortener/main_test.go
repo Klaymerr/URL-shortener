@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +10,9 @@ import (
 )
 
 func TestHandlerWithGin(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	ServerAddressLong = flag.String("a", "localhost:8080", "HTTP server address")
+	ServerAddressShort = flag.String("b", "http://localhost:8080/", "Base URL for short links")
+	flag.Parse()
 
 	router := gin.Default()
 
