@@ -11,7 +11,7 @@ import (
 
 func TestHandlerWithGin(t *testing.T) {
 	ServerAddressLong = flag.String("a", "localhost:8080", "HTTP server address")
-	ServerAddressShort = flag.String("b", "http://localhost:8080/", "Base URL for short links")
+	ServerAddressShort = flag.String("b", "http://localhost:8080", "Base URL for short links")
 	flag.Parse()
 
 	router := gin.Default()

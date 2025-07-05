@@ -48,12 +48,12 @@ func posting(c *gin.Context) {
 	newID := strconv.FormatInt(rand.Int64(), 36)
 	shortToOriginal[newID] = rawURL
 
-	c.String(http.StatusCreated, *ServerAddressShort+newID)
+	c.String(http.StatusCreated, *ServerAddressShort+"/"+newID)
 }
 
 func main() {
 	ServerAddressLong = flag.String("a", "localhost:8080", "HTTP server address")
-	ServerAddressShort = flag.String("b", "http://localhost:8080/", "Base URL for short links")
+	ServerAddressShort = flag.String("b", "http://localhost:8080", "Base URL for short links")
 	flag.Parse()
 
 	router := gin.Default()
