@@ -10,7 +10,7 @@ import (
 
 func TestHandlerWithGin(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	router := gin.Default()
 
 	router.HandleMethodNotAllowed = true
@@ -20,8 +20,6 @@ func TestHandlerWithGin(t *testing.T) {
 
 	router.GET("/:id", getting)
 	router.POST("/", posting)
-
-	router.Run("localhost:8080")
 
 	t.Run("Create short URL", func(t *testing.T) {
 		body := strings.NewReader("https://example.com")
