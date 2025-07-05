@@ -49,6 +49,12 @@ func posting(c *gin.Context) {
 
 func main() {
 	router := gin.Default()
+
+	router.HandleMethodNotAllowed = true
+	router.NoMethod(func(c *gin.Context) {
+		c.String(http.StatusMethodNotAllowed, "Method not allowed")
+	})
+
 	router.GET("/:id", getting)
 	router.POST("/", posting)
 

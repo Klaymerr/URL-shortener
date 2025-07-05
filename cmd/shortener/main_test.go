@@ -1,58 +1,68 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
 
-func TestHandler(t *testing.T) {
-	// Тестирование POST запроса (создание короткой ссылки)
+func TestHandlerWithGin(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	
+	router := gin.Default()
+
+	router.HandleMethodNotAllowed = true
+	router.NoMethod(func(c *gin.Context) {
+		c.String(http.StatusMethodNotAllowed, "Method not allowed")
+	})
+
+	router.GET("/:id", getting)
+	router.POST("/", posting)
+
+	router.Run("localhost:8080")
+
 	t.Run("Create short URL", func(t *testing.T) {
-		reqBody := strings.NewReader("https://example.com")
-		req := httptest.NewRequest(http.MethodPost, "/", reqBody)
+		body := strings.NewReader("https://example.com")
+		req := httptest.NewRequest(http.MethodPost, "/", body)
 		req.Header.Set("Content-Type", "text/plain")
 
 		rec := httptest.NewRecorder()
-		handler(rec, req)
+		router.ServeHTTP(rec, req)
 
 		if rec.Code != http.StatusCreated {
 			t.Errorf("expected status %d, got %d", http.StatusCreated, rec.Code)
 		}
 
-		shortURL := rec.Body.String()
-		if shortURL == "" {
-			t.Error("expected non-empty short URL")
+		resp := rec.Body.String()
+		if !strings.Contains(resp, "http://localhost:8080/") {
+			t.Errorf("unexpected response: %s", resp)
 		}
 	})
 
-	// Тестирование GET запроса (редирект)
 	t.Run("Redirect to original URL", func(t *testing.T) {
-		// Предварительно создаем тестовую запись
-		testID := "test123"
-		testURL := "https://example.com"
-		shortToOriginal[testID] = testURL
+		id := "test123"
+		original := "https://example.com"
+		shortToOriginal[id] = original
 
-		req := httptest.NewRequest(http.MethodGet, "/"+testID, nil)
+		req := httptest.NewRequest(http.MethodGet, "/"+id, nil)
 		rec := httptest.NewRecorder()
-		handler(rec, req)
+		router.ServeHTTP(rec, req)
 
 		if rec.Code != http.StatusTemporaryRedirect {
-			t.Errorf("expected status %d, got %d", http.StatusTemporaryRedirect, rec.Code)
+			t.Errorf("expected %d, got %d", http.StatusTemporaryRedirect, rec.Code)
 		}
-
-		location := rec.Header().Get("Location")
-		if location != testURL {
-			t.Errorf("expected location %s, got %s", testURL, location)
+		loc := rec.Header().Get("Location")
+		if loc != original {
+			t.Errorf("expected location %s, got %s", original, loc)
 		}
 	})
 
-	// Тестирование неверного метода
 	t.Run("Invalid method", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPut, "/", nil)
 		rec := httptest.NewRecorder()
-		handler(rec, req)
+		router.ServeHTTP(rec, req)
 
 		if rec.Code != http.StatusMethodNotAllowed {
 			t.Errorf("expected status %d, got %d", http.StatusMethodNotAllowed, rec.Code)
